@@ -1,103 +1,104 @@
-import Image from "next/image";
+"use client";
+//Import scheduling algorithms and bar chart features from local files.
+import {useState} from "react";
+import {Bar} from "react-chartjs-2"; //A bar for the chart. Next line imports the other chart features.
+import {Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend} from "chart.js";
+import {fifo, sjf, roundRobin} from "./utils/algorithms"; //The CPU scheduling algorithms.
+
+//Register the Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [numProcesses, setNumProcesses] = useState(5);
+  const [timeQuantum, setTimeQuantum] = useState(2);
+  const [results, setResults] = useState([]);
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState("fifo");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const generateProcesses = (n) => {
+    return Array.from({ length: n }, (_, i) => ({
+      id: i + 1,
+      arrivalTime: Math.floor(Math.random() * 10),
+      burstTime: Math.floor(Math.random() * 10) + 1,
+    }));
+  };
+
+  const runAlgorithm = () => {
+    const processes = generateProcesses(numProcesses);
+    let computedResults = [];
+
+    if (selectedAlgorithm === "fifo") {
+      computedResults = fifo(processes);
+    } else if (selectedAlgorithm === "sjf") {
+      computedResults = sjf(processes);
+    } else if (selectedAlgorithm === "rr") {
+      computedResults = roundRobin(processes, timeQuantum);
+    }
+
+    setResults(computedResults);
+  };
+
+  const chartData = {
+    labels: results.map((p) => `P${p.id}`),
+    datasets: [
+      {
+        label: "Completion Time",
+        data: results.map((p) => p.finishTime),
+        backgroundColor: "blue",
+      },
+    ],
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-8">
+      <h1 className="text-2xl font-bold">CPU Scheduling Simulator</h1>
+
+      {/* User Input Form */}
+      <div className="flex flex-col gap-4 mt-4">
+        <label>
+          Number of Processes:
+          <input
+            type="number"
+            value={numProcesses}
+            onChange={(e) => setNumProcesses(parseInt(e.target.value))}
+            className="border rounded px-2 py-1"
+          />
+        </label>
+
+        <label>
+          Time Quantum (RR only):
+          <input
+            type="number"
+            value={timeQuantum}
+            onChange={(e) => setTimeQuantum(parseInt(e.target.value))}
+            className="border rounded px-2 py-1"
+          />
+        </label>
+
+        <label>
+          Select Algorithm:
+          <select
+            value={selectedAlgorithm}
+            onChange={(e) => setSelectedAlgorithm(e.target.value)}
+            className="border rounded px-2 py-1"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+            <option value="fifo">FIFO</option>
+            <option value="sjf">SJF</option>
+            <option value="rr">Round Robin</option>
+          </select>
+        </label>
+
+        <button
+          onClick={runAlgorithm}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          Run Algorithm
+        </button>
+      </div>
+
+      {/* Chart Display */}
+      <div className="w-96 h-64 mt-8">
+        {results.length > 0 && <Bar data={chartData} />}
+      </div>
     </div>
   );
 }
