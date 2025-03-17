@@ -28,3 +28,6 @@ MLFQ (Multi-Level Feedback Queue)
 Describes any situation where one algorithm determines how to divide CPU time into queues, and other algorithms decide how to run each queue. For instance, different queues could have different priorities, and processes in the higher-priority queues will always run before those in lower-priority queues. Meanwhile, one queue may use Round-Robin scheduling for its individual prcoesses, but another queue may use Shortest Job Next. Thus, queues would be scheduled first according to priority, then according to either a round-robin schedule in the first queue, or by process length in the second queue.
 
 MLFQ is the most complex CPU scheduling algorithm to implement, but has the potential to employ a multitude of other algorithms in order to maximize their benefits while minimizing their drawbacks.
+
+How to use:
+First, download every file and make sure you have all the dependencies. Next, open a command console (not powershell) and navigate to the my-next-app folder under nextHello, in the main project folder. Run "npm run dev", wait for it to load, and CTRL+click the Network link. It should open in browser, but make sure to wait for it to compile first!
