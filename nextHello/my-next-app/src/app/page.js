@@ -25,37 +25,38 @@ export default function Home() {
     return Array.from({ length: n }, (_, i) => ({
       id: i + 1,
       arrivalTime: Math.floor(Math.random() * 10),
-      burstTime: Math.floor(Math.random() * 10) + 1,
+      burstTime: Math.floor(Math.random() * 10) + 1, // Ensure burst time is always greater than zero
     }));
   };
 
   const runAlgorithms = () => {
     const processes = generateProcesses(numProcesses);
     let computedResults = {};
-
+  
     try {
       if (selectedAlgorithms.fifo) {
-        computedResults.fifo = fifo(processes);
+        computedResults.fifo = fifo(JSON.parse(JSON.stringify(processes)));
       }
       if (selectedAlgorithms.sjf) {
-        computedResults.sjf = sjf(processes);
+        computedResults.sjf = sjf(JSON.parse(JSON.stringify(processes)));
       }
       if (selectedAlgorithms.stcf) {
-        computedResults.stcf = stcf(processes);
+        computedResults.stcf = stcf(JSON.parse(JSON.stringify(processes)));
       }
       if (selectedAlgorithms.rr) {
-        computedResults.rr = roundRobin(processes, timeQuantum);
+        computedResults.rr = roundRobin(JSON.parse(JSON.stringify(processes)), timeQuantum);
       }
       if (selectedAlgorithms.mlfq) {
-        computedResults.mlfq = mlfq(processes, mlfqQueues);
+        computedResults.mlfq = mlfq(JSON.parse(JSON.stringify(processes)), mlfqQueues);
       }
     } catch (error) {
       alert(error.message);
       return;
     }
-
+  
     setResults(computedResults);
   };
+  
 
   const chartData = (algorithm) => ({
     labels: results[algorithm]?.map((p) => `P${p.id}`) || [],
