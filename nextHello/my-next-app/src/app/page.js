@@ -1,11 +1,11 @@
 "use client";
-//Import scheduling algorithms and bar chart features from local files.
-import {useState} from "react";
-import {Bar} from "react-chartjs-2"; //A bar for the chart. Next line imports the other chart features.
-import {Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend} from "chart.js";
-import {fifo, sjf, roundRobin} from "./utils/algorithms"; //The CPU scheduling algorithms.
+// Import scheduling algorithms and bar chart features from local files.
+import { useState } from "react";
+import { Bar } from "react-chartjs-2"; // A bar for the chart. Next line imports the other chart features.
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+import { fifo, sjf, roundRobin } from "./utils/algorithms"; // The CPU scheduling algorithms.
 
-//Register the Chart.js components
+// Register the Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function Home() {
@@ -26,12 +26,17 @@ export default function Home() {
     const processes = generateProcesses(numProcesses);
     let computedResults = [];
 
-    if (selectedAlgorithm === "fifo") {
-      computedResults = fifo(processes);
-    } else if (selectedAlgorithm === "sjf") {
-      computedResults = sjf(processes);
-    } else if (selectedAlgorithm === "rr") {
-      computedResults = roundRobin(processes, timeQuantum);
+    try {
+      if (selectedAlgorithm === "fifo") {
+        computedResults = fifo(processes);
+      } else if (selectedAlgorithm === "sjf") {
+        computedResults = sjf(processes);
+      } else if (selectedAlgorithm === "rr") {
+        computedResults = roundRobin(processes, timeQuantum);
+      }
+    } catch (error) {
+      alert(error.message);
+      return;
     }
 
     setResults(computedResults);
