@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Bar } from "react-chartjs-2"; // A bar for the chart. Next line imports the other chart features.
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import { fifo, sjf, stcf, roundRobin, mlfq } from "./utils/algorithms"; // The CPU scheduling algorithms.
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 // Register the Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -32,7 +34,7 @@ export default function Home() {
   const runAlgorithms = () => {
     const processes = generateProcesses(numProcesses);
     let computedResults = {};
-  
+
     try {
       if (selectedAlgorithms.fifo) {
         computedResults.fifo = fifo(JSON.parse(JSON.stringify(processes)));
@@ -53,10 +55,9 @@ export default function Home() {
       alert(error.message);
       return;
     }
-  
+
     setResults(computedResults);
   };
-  
 
   const chartData = (algorithm) => ({
     labels: results[algorithm]?.map((p) => `P${p.id}`) || [],
@@ -68,6 +69,67 @@ export default function Home() {
       },
     ],
   });
+
+  const downloadPDF = () => {
+    const input = document.getElementById("results");
+  
+    // Ensure all content is rendered by setting minHeight temporarily
+    const originalHeight = input.style.height;
+    input.style.height = "auto"; // Let it expand fully
+  
+    html2canvas(input, {
+      scale: 2, // High-quality rendering
+      useCORS: true, // Fix for external content
+      windowWidth: document.documentElement.scrollWidth, // Capture full width
+      windowHeight: document.documentElement.scrollHeight, // Capture full height
+    }).then((canvas) => {
+      input.style.height = originalHeight; // Restore original height after capture
+  
+      const imgData = canvas.toDataURL("image/png");
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width; // Keep aspect ratio
+  
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+  
+      let y = 10; // Start position in PDF
+      let currentHeight = imgHeight;
+      let totalPages = Math.ceil(currentHeight / pageHeight);
+  
+      for (let i = 0; i < totalPages; i++) {
+        let cropHeight = Math.min(currentHeight, pageHeight);
+        let croppedCanvas = document.createElement("canvas");
+        croppedCanvas.width = canvas.width;
+        croppedCanvas.height = (cropHeight * canvas.width) / imgWidth;
+        let croppedCtx = croppedCanvas.getContext("2d");
+  
+        croppedCtx.drawImage(
+          canvas,
+          0,
+          i * (pageHeight * canvas.width) / imgWidth,
+          canvas.width,
+          (pageHeight * canvas.width) / imgWidth,
+          0,
+          0,
+          canvas.width,
+          (pageHeight * canvas.width) / imgWidth
+        );
+  
+        let croppedImgData = croppedCanvas.toDataURL("image/png");
+        pdf.addImage(croppedImgData, "PNG", 0, y, imgWidth, cropHeight);
+  
+        if (i < totalPages - 1) {
+          pdf.addPage();
+        }
+      }
+  
+      pdf.save("results.pdf");
+    });
+  };  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
@@ -132,10 +194,16 @@ export default function Home() {
         >
           Run Algorithms
         </button>
+        <button
+          onClick={downloadPDF}
+          className="bg-green-500 text-white px-4 py-2 rounded mt-2"
+        >
+          Download Results as PDF
+        </button>
       </div>
 
       {/* Chart Display */}
-      <div className="flex flex-wrap gap-8 mt-8">
+      <div id="results" className="flex flex-wrap gap-8 mt-8">
         {Object.keys(results).map((algorithm) => (
           <div key={algorithm} className="w-96 h-64">
             <h2 className="text-xl font-bold">{algorithm.toUpperCase()}</h2>
