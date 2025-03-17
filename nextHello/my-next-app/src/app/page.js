@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Bar } from "react-chartjs-2"; // A bar for the chart. Next line imports the other chart features.
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
-import { fifo, sjf, stcf, roundRobin } from "./utils/algorithms"; // The CPU scheduling algorithms.
+import { fifo, sjf, stcf, roundRobin, mlfq } from "./utils/algorithms"; // The CPU scheduling algorithms.
 
 // Register the Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -11,6 +11,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 export default function Home() {
   const [numProcesses, setNumProcesses] = useState(5);
   const [timeQuantum, setTimeQuantum] = useState(2);
+  const [mlfqQueues, setMlfqQueues] = useState([2, 4, 8]);
   const [results, setResults] = useState([]);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState("fifo");
 
@@ -35,6 +36,8 @@ export default function Home() {
         computedResults = stcf(processes);
       } else if (selectedAlgorithm === "rr") {
         computedResults = roundRobin(processes, timeQuantum);
+      } else if (selectedAlgorithm === "mlfq") {
+        computedResults = mlfq(processes, mlfqQueues);
       }
     } catch (error) {
       alert(error.message);
@@ -82,6 +85,16 @@ export default function Home() {
         </label>
 
         <label>
+          MLFQ Queues (comma-separated):
+          <input
+            type="text"
+            value={mlfqQueues.join(",")}
+            onChange={(e) => setMlfqQueues(e.target.value.split(",").map(Number))}
+            className="border rounded px-2 py-1"
+          />
+        </label>
+
+        <label>
           Select Algorithm:
           <select
             value={selectedAlgorithm}
@@ -92,6 +105,7 @@ export default function Home() {
             <option value="sjf">SJF</option>
             <option value="stcf">STCF</option>
             <option value="rr">Round Robin</option>
+            <option value="mlfq">MLFQ</option>
           </select>
         </label>
 
