@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Bar } from "react-chartjs-2"; // A bar for the chart. Next line imports the other chart features.
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
-import { fifo, sjf, roundRobin } from "./utils/algorithms"; // The CPU scheduling algorithms.
+import { fifo, sjf, stcf, roundRobin } from "./utils/algorithms"; // The CPU scheduling algorithms.
 
 // Register the Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -31,6 +31,8 @@ export default function Home() {
         computedResults = fifo(processes);
       } else if (selectedAlgorithm === "sjf") {
         computedResults = sjf(processes);
+      } else if (selectedAlgorithm === "stcf") {
+        computedResults = stcf(processes);
       } else if (selectedAlgorithm === "rr") {
         computedResults = roundRobin(processes, timeQuantum);
       }
@@ -88,6 +90,7 @@ export default function Home() {
           >
             <option value="fifo">FIFO</option>
             <option value="sjf">SJF</option>
+            <option value="stcf">STCF</option>
             <option value="rr">Round Robin</option>
           </select>
         </label>

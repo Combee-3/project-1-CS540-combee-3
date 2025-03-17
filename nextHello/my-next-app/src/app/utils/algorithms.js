@@ -38,8 +38,40 @@ export function sjf(processes) {
   return fifo(sorted);
 } //end of SJF
 
-  //Shortest Time-To-Completion First (STCF) is too complex.
-  //Requires a simulation loop??
+//Shortest Time-To-Completion First (STCF)
+export function stcf(processes) {
+  //if the array of processes to run is not empty,
+  if (!Array.isArray(processes) || processes.length === 0)
+    {
+      throw new Error("Processes should be a non-empty array");
+    }
+    
+    //set variables for STCF algorithm
+    let currentTime = 0;
+    let completedProcesses = [];
+    let remainingProcesses = [...processes];
+    
+    //run STCF for each process in the queue
+    while (remainingProcesses.length > 0)
+      {
+        remainingProcesses.sort((a, b) => a.burstTime - b.burstTime);
+        let process = remainingProcesses.shift();
+        
+        //if the process burst time is greater than zero
+        if (process.burstTime <= 0)
+          {
+            throw new Error("Burst time should be a positive value");
+          }
+          
+        //continue running the STCF algorithm
+        let startTime = currentTime;
+        let finishTime = startTime + process.burstTime;
+        currentTime = finishTime;
+        
+        completedProcesses.push({ ...process, startTime, finishTime });
+      } //end of while loop
+  return completedProcesses; //return output for the pages file
+} //end of STCF
   
 //Round Robin (RR)
 export function roundRobin(processes, quantum) {
